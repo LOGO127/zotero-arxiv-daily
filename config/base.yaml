@@ -45,6 +45,7 @@ reranker:
 
 executor:
   debug: false # Whether to use debug mode. Example: true
+  use_original_abstracts: ${oc.decode:${oc.env:USE_ORIGINAL_ABSTRACTS,false}}
   send_empty: false # Whether to send an empty email even if no new papers today. Example: true
   max_paper_num: 100 # The maximum number of the papers presented in the email. Example: 100
   source: ??? # The sources of papers to retrieve. Example: ['arxiv','biorxiv','medrxiv']

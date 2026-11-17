@@ -109,6 +109,7 @@ def _extract_text_from_tar_worker(source_url: str, paper_id: str, paper_title: s
 class ArxivRetriever(BaseRetriever):
     def __init__(self, config):
         super().__init__(config)
+        self.use_original_abstracts = self.config.get("executor", {}).get("use_original_abstracts", False)
         if self.config.source.arxiv.category is None:
             raise ValueError("category must be specified for arxiv.")
 
@@ -146,11 +147,13 @@ class ArxivRetriever(BaseRetriever):
         authors = [a.name for a in raw_paper.authors]
         abstract = raw_paper.summary
         pdf_url = raw_paper.pdf_url
-        full_text = extract_text_from_tar(raw_paper)
-        if full_text is None:
-            full_text = extract_text_from_html(raw_paper)
-        if full_text is None:
-            full_text = extract_text_from_pdf(raw_paper)
+        full_text = None
+        if not self.use_original_abstracts:
+            full_text = extract_text_from_tar(raw_paper)
+            if full_text is None:
+                full_text = extract_text_from_html(raw_paper)
+            if full_text is None:
+                full_text = extract_text_from_pdf(raw_paper)
         return Paper(
             source=self.name,
             title=title,
