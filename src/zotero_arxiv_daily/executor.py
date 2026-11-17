@@ -4,7 +4,6 @@ from omegaconf import DictConfig, ListConfig
 from .utils import glob_match
 from .retriever import get_retriever_cls
 from .protocol import CorpusPaper
-import random
 from datetime import datetime
 from .reranker import get_reranker_cls
 from .construct_email import render_email
@@ -64,7 +63,7 @@ class Executor:
     
     def filter_corpus(self, corpus:list[CorpusPaper]) -> list[CorpusPaper]:
         if self.include_path_patterns:
-            logger.info(f"Selecting zotero papers matching include_path: {self.include_path_patterns}")
+            logger.info("Selecting Zotero papers by collection")
             corpus = [
                 c for c in corpus
                 if any(
@@ -74,7 +73,7 @@ class Executor:
                 )
             ]
         if self.ignore_path_patterns:
-            logger.info(f"Excluding zotero papers matching ignore_path: {self.ignore_path_patterns}")
+            logger.info("Excluding Zotero papers by collection")
             corpus = [
                 c for c in corpus
                 if not any(
@@ -84,9 +83,7 @@ class Executor:
                 )
             ]
         if self.include_path_patterns or self.ignore_path_patterns:
-            samples = random.sample(corpus, min(5, len(corpus)))
-            samples = '\n'.join([c.title + ' - ' + '\n'.join(c.paths) for c in samples])
-            logger.info(f"Selected {len(corpus)} zotero papers:\n{samples}\n...")
+            logger.info(f"Selected {len(corpus)} Zotero papers")
         return corpus
 
     
@@ -94,7 +91,7 @@ class Executor:
         corpus = self.fetch_zotero_corpus()
         corpus = self.filter_corpus(corpus)
         if len(corpus) == 0:
-            logger.error(f"No zotero papers found. Please check your zotero settings:\n{self.config.zotero}")
+            logger.error("No Zotero papers found. Please check your library and collection filters.")
             return
         all_papers = []
         for source, retriever in self.retrievers.items():

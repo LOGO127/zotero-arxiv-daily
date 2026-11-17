@@ -26,9 +26,11 @@ jobs:
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
-          CUSTOM_CONFIG: ${{ vars.CUSTOM_CONFIG }}
+          CUSTOM_CONFIG: ${{ vars.CUSTOM_CONFIG || secrets.CUSTOM_CONFIG }}
         run: |
-          printf "%b\n" "$CUSTOM_CONFIG" > config/custom.yaml
-          echo "Use custom config: "
-          cat config/custom.yaml
+          if [[ -z "${CUSTOM_CONFIG//[[:space:]]/}" ]]; then
+            echo "::error::Set CUSTOM_CONFIG in Actions Variables or Secrets."
+            exit 1
+          fi
+          printf '%s\n' "$CUSTOM_CONFIG" > config/custom.yaml
           uv run src/zotero_arxiv_daily/main.py
